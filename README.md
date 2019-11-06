@@ -1,6 +1,18 @@
-# Baseline for Assignment 2 of 11-731 "Machine Translation and Sequence-to-sequence Models" Fall 2019
+# Assignment 2 of 11-731 "Machine Translation and Sequence-to-sequence Models" Fall 2019
 
-This repo contains a simplified implementation of the Transformer [(Vaswani et al, 2019)](https://arxiv.org/abs/1706.03762) to serve as a baseline.
+This repo forked from the [baseline implementation](https://github.com/pmichel31415/11731-assignment-2-baseline) of a Transformer [(Vaswani et al, 2019)](https://arxiv.org/abs/1706.03762) model. We tried several methods tailored for the low-resource machine translation tasks to get better results on dev set.
+
+## Group Member
+* **Jin Cao (jincao)** - *Label smoothing, teacher forcing, preprocessing for parallel corpus and fine tuned hyperparameters* - [Jin](https://github.com/jin0726)
+* **Kaiyu Zheng (kaiyuz)** - *Back translation, preprocessing for parallel corpus, fine tuned hyperparameters* - [Kevin](https://github.com/Kevin19961023)
+* **Xinyu Chang (xinyuc)** - *Transfer learning, preprocessing for parallel corpus, fine tuned hyperparameters* - [Xinyu](https://github.com/WhiplashCxy)
+
+## Our Results
+The translated files are included under /output directory. Here is a summary of our test results upon the dev set, and a comparison to the upper bound of baseline results.
+||en-af|en-ts|en-nso|
+|-|-|-|-|
+|Dev|39.05|38.92|19.81|
+|Baseline+|6.58|4.78|1.66
 
 ## Requirements
 
@@ -37,7 +49,7 @@ For my baseline I learned a joint BPE model of vocabulary size 8000 for each lan
 
 You can train a baseline system for each language pair by running the commands in `scripts/train_{af,ts,nso}.sh`. Depending on the language pair the models should take between 1 to 3 hours to train, although of course this may vary depending on your GPU.
 
-## Results
+## Baseline Results
 
 As shown in the training scripts, you can decode from a trained model by running `python baseline/translate.py` with the appropriate arguments. BLEU score is evaluated by calling
 
