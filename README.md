@@ -1,22 +1,69 @@
-For assignment 2, you are going to explore approaches to improve NMT systems that translate English into a low-resource language. Specifically, we focus on three languages from Africa: Xitsonga (ts), Northern Sotho (nso), Afrikaans (af). Low-resource translation is an active research area in NMT, since neural models tend to under-perform statistical method with limited data[1]. It is particularly interesting to study NMT systems that translate into a low-resource language other than English, as it allows us to improve systems that can better serve the minority languages and the people who speak them.   
+# Baseline for Assignment 2 of 11-731 "Machine Translation and Sequence-to-sequence Models" Fall 2019
 
-## Dataset
+This repo contains a simplified implementation of the Transformer [(Vaswani et al, 2019)](https://arxiv.org/abs/1706.03762) to serve as a baseline.
 
-We provide the train/dev/test sets for the three languages under the folder `data/`. These are untokenized raw data. For this assignment, you can use your own pre-processing strategies, such as sentencepiece or data cleaning strategies, to improve the NMT system. Our data is from the ukuxhumana project (https://github.com/LauraMartinus/ukuxhumana).
+## Requirements
 
-## Output
+This code was written for python >=3.6 and pytorch 1.1, although higher versions of pytorch might also work. You will need a few additional packages. Here's how you can set up the environment (assuming you have python >=3.6):
 
-We only provide the source side (in English) of the test sets. You are expected to use the dev sets for model evaluation, decode the test set using the best model, and submit the decoded outputs (You should document the dev set BLEU scores, and its corresponding test decoding files. We will evaluate the test set performance). The format of the test set decoding should be a standard text file, with one translation sentence per line and in the same order as the source sentences.
+```bash
+# [OPTIONAL ]Setup virtual environment
+pip install virtualenv
+virtualenv env
+source env/bin/activate
+# Install pytorch 1.1.0 (you can also try the latest version although the code hasn't been tested with it)
+pip install torch==1.1.0
+# Install TQDM (for fancy progress bars)
+pip install tqdm
+# Install sentencepiece (this is used for subword segmentation)
+pip install sentencepiece
+# Install sacrebleu (this is used to evaluate BLEU score on detokenized text)
+pip install sacrebleu
+```
 
-## Baseline
+## Preparing the Data
 
-We will release a baseline number based on a Transformer model, using only the training data provided. If your code from assignment 1 performs quite well, you are welcomed to implement this assignment based on your own code. If not, you can use our Transformer model, which will be released soon. Either way, the focus of this assignment is to come up with specific strategies to improve the NMT performance under low-resource settings.   
- 
-## Methods
+The data has been compiled from 3 language pairs from the [Ukuxhumana](https://github.com/LauraMartinus/ukuxhumana) dataset. You are tasked with translating from English to 3 low resource South African languages: Afrikaans (af), Xitsonga (ts) and Northern Sotho (nso). Download and extract the data in the root of this repo:
 
-For this project, we expect you to explore interesting ideas that can improve low-resource NMT. Some potential ideas include: 1) use data from related langauges that are similar to the low-resource language[2]. You can use other publically available datasets, but make sure to cite them; 2) some data cleaning methods, or intelligent data augmentation strategies such as back-translation etc.; 3) modifications to the model architecture, or adding other information, such as syntax, to help model generalize better.  
 
-It is good to try out some methods proposed in recent research papers. An easy way to get started with literature reading is to search for NMT papers in the recent proceedings of ACL, EMNLP, and NAACL. We encourage you to be creative and come up with your own ideas! Even if it didn't work out as well, it is valuable to document the motivation behind your idea, the results, and analysis of why you think it doesn't perform as well.
+```bash
+wget http://www.phontron.com/data/cs11731-2019-assignment2.zip
+unzip cs11731-2019-assignment2.zip
+```
 
-[1] Six Challenges for Neural Machine Translation. Philipp Koehn and Rebecca Knowles. In ACL 2017.
-[2] Rapid Adaptation of Neural Machine Translation to New Languages. Graham Neubig and Junjie Hu. In EMNLP 2018.
+For my baseline I learned a joint BPE model of vocabulary size 8000 for each language pair. The code for all things related to subwords is in `baseline/subwords.py`, take a look to understand how it works. You can reproduce my preprocessing by running `bash scripts/prepare_bpe.sh`.
+
+## Training the Baseline
+
+You can train a baseline system for each language pair by running the commands in `scripts/train_{af,ts,nso}.sh`. Depending on the language pair the models should take between 1 to 3 hours to train, although of course this may vary depending on your GPU.
+
+## Results
+
+As shown in the training scripts, you can decode from a trained model by running `python baseline/translate.py` with the appropriate arguments. BLEU score is evaluated by calling
+
+```bash
+cat [out file] | sacrebleu -w 2 [ref file]
+```
+
+Note that both output and reference file should be detokenized. Sacrebleu will perform its own tokenization. This is to make sure that the BLEU scores are comparable irrespective of the tokenization you use in your model. The `-w 2` means that we want BLEU score with 2 decimals, although keep in mind that BLEU differences smaller than 0.5 are unlikely to be statistically significant (on a scale of 100).
+
+For the simple baselines provided here, the scores are as follows:
+
+||en-af|en-ts|en-nso|
+|-|-|-|-|
+|Dev|31.39|32.10|18.27|
+|Test|31.38|33.27|21.20|
+
+### Variance in Scores
+
+Since there is some variance in the final BLEU score depending on the random seed/environment, we also provide the average BLEU over 5 random reruns for each language pair (standard deviation in parentheses):
+
+||en-af|en-ts|en-nso|
+|-|-|-|-|
+|Dev|31.12 (±1.35)|32.86 (±1.28)|17.68 (±0.47)|
+|Test|30.80 (±0.76)|32.63 (±1.31)|21.14 (±0.44)|
+
+
+---
+
+This code is adapted from a tutorial I wrote for the JSALT 2019 summer school: https://github.com/pmichel31415/jsalt-2019-mt-tutorial
