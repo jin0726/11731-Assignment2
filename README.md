@@ -12,8 +12,8 @@ The translated files are included under /output directory. Here is a summary of 
 
 ||en-af|en-ts|en-nso|
 |-|-|-|-|
-|Dev|39.05|38.92|19.81|
-|Baseline+|6.58|4.78|1.66
+|Dev|39.05|39.94|19.81|
+|Baseline+|6.58|5.80|1.66
 
 ## Requirements
 
